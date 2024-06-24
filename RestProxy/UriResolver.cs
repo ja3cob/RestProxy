@@ -8,8 +8,8 @@ internal static class UriResolver
 {
     private const string ControllerSuffix = "Controller";
 
-    private static Type _controller;
-    private static MethodInfo _method;
+    private static Type _controller = null!;
+    private static MethodInfo _method = null!;
     private static object?[]? _args;
 
     public static string Resolve(MethodInfo method, object?[]? args, string defaultRoute)
@@ -65,9 +65,12 @@ internal static class UriResolver
             && p.Name == paramName);
 
         int index = Array.IndexOf(parameters, targetParameter);
-        if (index < 0 || _args[index] == null) { return null; }
+        if (index < 0)
+        {
+            return string.Empty;
+        }
 
-        return _args[index].ToString();
+        return _args?[index]?.ToString() ?? string.Empty;
     }
 
     private static string ReplaceEntities(this string uri)

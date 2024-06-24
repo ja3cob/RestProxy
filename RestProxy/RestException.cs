@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace RestProxy;
+﻿namespace RestProxy;
 
 public class RestException : Exception
 {

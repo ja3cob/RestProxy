@@ -23,7 +23,13 @@ public class RestProxyManager(string baseUri)
         }
 
         proxy.ApiCaller = _apiCaller;
-        return proxy as TController;
+
+        if (proxy is not TController result)
+        {
+            throw new RestException("Error while creating communication proxy with the api");
+        }
+
+        return result;
     }
 
     private static bool VerifyController<TController>()
