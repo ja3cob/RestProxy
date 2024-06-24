@@ -1,0 +1,22 @@
+name: Deploy package
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        source-url: https://nuget.pkg.github.com/ja3cob/index.json
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}     
+    - name: Pack
+      run: dotnet pack --configuration Release -o out
+    - name: Push
+      run: dotnet nuget push ./out/*.nupkg
