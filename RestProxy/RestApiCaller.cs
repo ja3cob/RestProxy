@@ -92,12 +92,12 @@ internal class RestApiCaller
 
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            throw new RestException("The requested resource could not be found");
+            throw new RestException("The requested resource could not be found", response.StatusCode);
         }
 
-        if (!response.IsSuccessStatusCode)
+        if (response.IsSuccessStatusCode == false)
         {
-            throw new RestException($"Error while processing the request. Server returned {response.StatusCode} code");
+            throw new RestException("Error while processing the request", response.StatusCode);
         }
 
         return response;
