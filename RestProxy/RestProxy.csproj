@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Description>Proxy for clients that connect with ASP.NET Core server</Description>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
