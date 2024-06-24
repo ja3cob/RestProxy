@@ -11,6 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ASPClientLib" Version="1.0.6" />
+    <PackageReference Include="ASPClientLib" Version="1.0.7" />
   </ItemGroup>
 </Project>
