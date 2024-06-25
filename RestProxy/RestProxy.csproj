@@ -6,7 +6,15 @@
     <Nullable>enable</Nullable>
     <Description>Proxy for clients that connect with ASP.NET Core server</Description>
     <Version>1.0.3</Version>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ASPClientLib" Version="1.0.8" />
