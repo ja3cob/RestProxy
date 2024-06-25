@@ -2,7 +2,7 @@
 Proxy generator for .NET HTTP clients, which connect to an ASP.NET Core server.
 
 ## Remarks
-This package is still in development and definitely misses some features. If you would like to propose something reach me out on [GitHub](https://github.com/ja3cob)
+This package is still in development and definitely misses some features. If you would like to propose something you can create an issue on [GitHub](https://github.com/ja3cob/RestProxy)
 
 ## Usage
 1. Generate an interface representing your controller in ASP.NET Core server, but use types from **[ASPClientLib](https://github.com/ja3cob/ASPClientLib)** package (this allows support on all platforms because ASP.NET Core framework sometimes cannot be referenced). Controller interface must include at least **RouteAttribute** on the interface or actions and **HttpMethodAttribute** on all actions.
