@@ -36,7 +36,7 @@ internal class RestProxy : DispatchProxy
         object? result = null;
         if (string.IsNullOrEmpty(response) == false && returnType.IsGenericType)
         {
-            object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0]);
+            object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0], new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             result = Activator.CreateInstance(returnType, deserializedResponse);
         }
 
@@ -56,7 +56,7 @@ internal class RestProxy : DispatchProxy
             if (Array.Exists(methodParams[i].GetCustomAttributes(false), p => p is FromBodyAttribute)
                 && args?[i] != null)
             {
-                return JsonSerializer.Serialize(args[i]);
+                return JsonSerializer.Serialize(args[i], new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             }
         }
 
