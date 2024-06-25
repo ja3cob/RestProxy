@@ -33,14 +33,12 @@ internal class RestProxy : DispatchProxy
             ? targetMethod.ReturnType.GetGenericArguments()[0]
             : targetMethod.ReturnType;
 
-        if (string.IsNullOrEmpty(response)
-            || returnType.IsGenericType == false)
+        object? result = null;
+        if (string.IsNullOrEmpty(response) == false && returnType.IsGenericType)
         {
-            return null;
+            object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0]);
+            result = Activator.CreateInstance(returnType, deserializedResponse);
         }
-
-        object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0]);
-        object? result = Activator.CreateInstance(returnType, deserializedResponse);
 
         return returnsTask
             ? typeof(Task)
