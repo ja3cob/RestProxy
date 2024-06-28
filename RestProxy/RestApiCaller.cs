@@ -58,10 +58,6 @@ internal class RestApiCaller
         {
             requestWithoutContent = _client.GetAsync;
         }
-        else
-        {
-            throw new InvalidOperationException($"Method {method.Method} is not supported");
-        }
 
         try
         {
@@ -75,7 +71,7 @@ internal class RestApiCaller
             }
             else
             {
-                throw new InvalidOperationException($"Method {method.Method} is not supported");
+                throw new RestException($"Method {method.Method} is not supported");
             }
 
             if (response == null)

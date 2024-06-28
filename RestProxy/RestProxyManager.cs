@@ -1,15 +1,20 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Reflection;
 using ASPClientLib.Attributes;
 using ASPClientLib.Classes;
 using ASPClientLib.Interfaces;
 
 namespace RestProxy;
 
+public delegate void RequestFinishedEventHandler(bool success, string? message = null, HttpStatusCode? code = null);
+
 public class RestProxyManager(string baseUri)
 {
+    public event RequestFinishedEventHandler? RequestFinished;
+
     private readonly RestApiCaller _apiCaller = new(baseUri);
 
-    public TController GetProxy<TController>()
+    public TController GetProxy<TController>(bool throwOnNonSuccessfulResponse = true)
         where TController : class
     {
         if (!VerifyController<TController>())
@@ -23,6 +28,8 @@ public class RestProxyManager(string baseUri)
         }
 
         proxy.ApiCaller = _apiCaller;
+        proxy.RequestFinished = RequestFinished;
+        proxy.ThrowOnNonSuccessfulResponse = throwOnNonSuccessfulResponse;
 
         if (proxy is not TController result)
         {
