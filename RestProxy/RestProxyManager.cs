@@ -6,7 +6,7 @@ using ASPClientLib.Interfaces;
 
 namespace RestProxy;
 
-public delegate void RequestFinishedEventHandler(bool success, string? message = null, HttpStatusCode? code = null);
+public delegate void RequestFinishedEventHandler(bool success, HttpStatusCode code, string? message = null);
 
 public class RestProxyManager(string baseUri)
 {

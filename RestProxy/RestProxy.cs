@@ -35,7 +35,7 @@ internal class RestProxy : DispatchProxy
         }
         catch (RestException rex)
         {
-            RequestFinished?.Invoke(false, rex.Message, rex.Code);
+            RequestFinished?.Invoke(false, rex.Code, rex.Message);
             if (ThrowOnNonSuccessfulResponse)
             {
                 throw;
@@ -44,7 +44,7 @@ internal class RestProxy : DispatchProxy
             return null;
         }
 
-        RequestFinished?.Invoke(true, null, httpResponse.StatusCode);
+        RequestFinished?.Invoke(true, httpResponse.StatusCode);
 
         string? response = httpResponse?.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
