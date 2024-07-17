@@ -24,7 +24,7 @@ public class RestProxyManager(string baseUri)
 
         if (DispatchProxy.Create<TController, RestProxy>() is not RestProxy proxy)
         {
-            throw new RestException("Error while creating communication proxy with the api");
+            throw new RestException("Error while creating communication proxy with the api", HttpStatusCode.InternalServerError);
         }
 
         proxy.ApiCaller = _apiCaller;
@@ -33,7 +33,7 @@ public class RestProxyManager(string baseUri)
 
         if (proxy is not TController result)
         {
-            throw new RestException("Error while creating communication proxy with the api");
+            throw new RestException("Error while creating communication proxy with the api", HttpStatusCode.InternalServerError);
         }
 
         return result;

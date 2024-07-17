@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Reflection;
 using System.Text.Json;
 using ASPClientLib.Attributes;
 
@@ -18,7 +19,7 @@ internal class RestProxy : DispatchProxy
 
         if (ApiCaller == null)
         {
-            throw new RestException(nameof(ApiCaller));
+            throw new RestException(nameof(ApiCaller), HttpStatusCode.InternalServerError);
         }
 
         string requestUri = UriResolver.Resolve(targetMethod, args, ControllerRoute);
@@ -89,7 +90,7 @@ internal class RestProxy : DispatchProxy
             HttpPutAttribute => HttpMethod.Put,
             HttpPatchAttribute => HttpMethod.Patch,
             HttpDeleteAttribute => HttpMethod.Delete,
-            _ => throw new RestException("Method not supported")
+            _ => throw new RestException("Method not supported", HttpStatusCode.BadRequest)
         };
     }
 }

@@ -19,8 +19,10 @@ internal class RestApiCaller
 
     private static HttpClient CreateHttpClient(string baseUri)
     {
-        var client = new HttpClient();
-        client.BaseAddress = new Uri(baseUri);
+        var client = new HttpClient
+        {
+            BaseAddress = new Uri(baseUri)
+        };
 
         client.DefaultRequestHeaders.Add("Accept", "application/json");
         return client;
@@ -57,8 +59,12 @@ internal class RestApiCaller
         {
             requestWithoutContent = _client.GetAsync;
         }
+        else
+        {
+            throw new RestException($"Method {method.Method} is not supported", HttpStatusCode.BadRequest);
+        }
 
-        HttpResponseMessage? response;
+        HttpResponseMessage? response = null;
         try
         {
             if (requestWithContent != null)
@@ -69,19 +75,15 @@ internal class RestApiCaller
             {
                 response = await requestWithoutContent(requestUri).ConfigureAwait(false);
             }
-            else
-            {
-                throw new RestException($"Method {method.Method} is not supported");
-            }
 
             if (response == null)
             {
-                throw new RestException("Server returned null");
+                throw new RestException("Server returned null", HttpStatusCode.InternalServerError);
             }
         }
         catch (Exception ex)
         {
-            throw new RestException("Error while processing the request", ex);
+            throw new RestException("Error while processing the request", HttpStatusCode.InternalServerError, ex);
         }
 
         SetCookies(response);
