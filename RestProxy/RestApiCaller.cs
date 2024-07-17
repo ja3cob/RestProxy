@@ -37,7 +37,6 @@ internal class RestApiCaller
         Func<string, StringContent?, Task<HttpResponseMessage>>? requestWithContent = null;
         Func<string, Task<HttpResponseMessage>>? requestWithoutContent = null;
 
-        HttpResponseMessage? response;
         if (method == HttpMethod.Post)
         {
             requestWithContent = _client.PostAsync;
@@ -59,6 +58,7 @@ internal class RestApiCaller
             requestWithoutContent = _client.GetAsync;
         }
 
+        HttpResponseMessage? response;
         try
         {
             if (requestWithContent != null)
