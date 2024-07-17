@@ -7,6 +7,8 @@ namespace RestProxy;
 
 internal class RestProxy : DispatchProxy
 {
+    private static readonly JsonSerializerOptions _defaultJsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+
     public RestApiCaller? ApiCaller { get; set; }
     public string ControllerRoute { get; set; } = "";
     public bool ThrowOnNonSuccessfulResponse { get; set; } = true;
@@ -54,7 +56,7 @@ internal class RestProxy : DispatchProxy
         object? result = null;
         if (string.IsNullOrEmpty(response) == false && returnType.IsGenericType)
         {
-            object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0], new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            object? deserializedResponse = JsonSerializer.Deserialize(response, returnType.GetGenericArguments()[0], _defaultJsonSerializerOptions);
             result = Activator.CreateInstance(returnType, deserializedResponse);
         }
 
@@ -74,7 +76,7 @@ internal class RestProxy : DispatchProxy
             if (Array.Exists(methodParams[i].GetCustomAttributes(false), p => p is FromBodyAttribute)
                 && args?[i] != null)
             {
-                return JsonSerializer.Serialize(args[i], new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                return JsonSerializer.Serialize(args[i], _defaultJsonSerializerOptions);
             }
         }
 

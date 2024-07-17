@@ -43,7 +43,7 @@ public class RestProxyManager(string baseUri)
     {
         var controllerType = typeof(TController);
         if (controllerType.IsInterface == false
-            || controllerType.Name.StartsWith("I") == false)
+            || controllerType.Name.StartsWith('I') == false)
         {
             return false;
         }
