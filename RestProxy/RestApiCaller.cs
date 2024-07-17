@@ -95,7 +95,8 @@ internal class RestApiCaller
 
         if (response.IsSuccessStatusCode == false)
         {
-            throw new RestException("Error while processing the request", response.StatusCode);
+            string? message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            throw new RestException(message ?? "Error while processing the request", response.StatusCode);
         }
 
         return response;
