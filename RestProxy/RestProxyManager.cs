@@ -8,11 +8,11 @@ namespace RestProxy;
 
 public delegate void RequestFinishedEventHandler(bool success, HttpStatusCode code, string? message = null);
 
-public class RestProxyManager(string baseUri, double requestTimeoutMiliseconds = 5000)
+public class RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000)
 {
     public event RequestFinishedEventHandler? RequestFinished;
 
-    private readonly RestApiCaller _apiCaller = new(baseUri, requestTimeoutMiliseconds);
+    private readonly RestApiCaller _apiCaller = new(baseUri, requestTimeoutMilliseconds);
 
     public TController GetProxy<TController>(bool throwOnNonSuccessfulResponse = true)
         where TController : class

@@ -7,22 +7,22 @@ internal class RestApiCaller
 {
     private readonly HttpClient _client;
 
-    public RestApiCaller(string baseUri, double requestTimeoutMiliseconds)
+    public RestApiCaller(string baseUri, double requestTimeoutMilliseconds)
     {
         if(string.IsNullOrEmpty(baseUri))
         {
             throw new ArgumentException("Base uri cannot be empty");
         }
 
-        _client = CreateHttpClient(baseUri, requestTimeoutMiliseconds);
+        _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds);
     }
 
-    private static HttpClient CreateHttpClient(string baseUri, double timeoutMiliseconds)
+    private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds)
     {
         var client = new HttpClient
         {
             BaseAddress = new Uri(baseUri),
-            Timeout = TimeSpan.FromMilliseconds(timeoutMiliseconds),
+            Timeout = TimeSpan.FromMilliseconds(requestTimeoutMilliseconds),
         };
 
         client.DefaultRequestHeaders.Add("Accept", "application/json");
