@@ -47,14 +47,19 @@ internal static class UriResolver
 
     private static string ResolveRoute()
     {
-        object? routeObj = Array.Find(_method.GetCustomAttributes(false), p => p is RouteAttribute)
-                           ?? Array.Find(_controller.GetCustomAttributes(false), p => p is RouteAttribute);
-        if (routeObj == default)
+        object? controllerRouteObj = Array.Find(_controller.GetCustomAttributes(false), p => p is RouteAttribute);
+        object? methodRouteObj = Array.Find(_method.GetCustomAttributes(false), p => p is RouteAttribute);
+        if (controllerRouteObj == default && methodRouteObj == null)
         {
             throw new ArgumentException("Controller or method need to have route attribute");
         }
 
-        return ((RouteAttribute)routeObj).Template.ReplaceTokens().ReplaceEntities();
+        return ResolveRoute((RouteAttribute?)controllerRouteObj) + ResolveRoute((RouteAttribute?)methodRouteObj);
+    }
+
+    private static string ResolveRoute(RouteAttribute? attribute)
+    {
+        return attribute?.Template.ReplaceTokens().ReplaceEntities() ?? string.Empty;
     }
 
     private static string GetRouteParameterValue(ParameterInfo[] parameters, string paramName)
