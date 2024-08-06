@@ -10,7 +10,6 @@ internal class RestProxy : DispatchProxy
     private static readonly JsonSerializerOptions DefaultJsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
     public RestApiCaller? ApiCaller { get; set; }
-    public string ControllerRoute { get; set; } = "";
     public bool ThrowOnNonSuccessfulResponse { get; set; } = true;
 
     public RequestFinishedEventHandler? RequestFinished;
@@ -24,7 +23,7 @@ internal class RestProxy : DispatchProxy
             throw new RestException(nameof(ApiCaller), HttpStatusCode.InternalServerError);
         }
 
-        string requestUri = UriResolver.Resolve(targetMethod, args, ControllerRoute);
+        string requestUri = UriResolver.Resolve(targetMethod, args);
         HttpMethod method = ResolveMethod(targetMethod);
         string? body = ResolveBody(targetMethod, args);
 

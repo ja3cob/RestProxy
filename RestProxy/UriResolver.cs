@@ -12,7 +12,7 @@ internal static class UriResolver
     private static MethodInfo _method = null!;
     private static object?[]? _args;
 
-    public static string Resolve(MethodInfo method, object?[]? args, string defaultRoute)
+    public static string Resolve(MethodInfo method, object?[]? args)
     {
         _controller = method.DeclaringType ?? throw new ArgumentException("Method declaring type is null");
         _method = method;
