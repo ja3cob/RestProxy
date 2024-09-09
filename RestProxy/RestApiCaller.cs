@@ -74,6 +74,11 @@ internal class RestApiCaller
             }
             else if (requestWithoutContent != null)
             {
+                if (body != null)
+                {
+                    throw new RestException("Method does not support body", HttpStatusCode.BadRequest);
+                }
+
                 response = await requestWithoutContent(requestUri).ConfigureAwait(false);
             }
 
