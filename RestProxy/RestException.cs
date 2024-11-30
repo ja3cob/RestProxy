@@ -1,18 +1,20 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 
-namespace RestProxy;
-
-public class RestException : Exception
+namespace RestProxy
 {
-    public HttpStatusCode Code { get; }
-
-    public RestException(string message, HttpStatusCode code) : base(message)
+    public class RestException : Exception
     {
-        Code = code;
-    }
+        public HttpStatusCode Code { get; }
 
-    public RestException(string message, HttpStatusCode code, Exception inner) : base(message, inner) 
-    {
-        Code = code;
+        public RestException(string message, HttpStatusCode code) : base(message)
+        {
+            Code = code;
+        }
+
+        public RestException(string message, HttpStatusCode code, Exception inner) : base(message, inner) 
+        {
+            Code = code;
+        }
     }
 }
