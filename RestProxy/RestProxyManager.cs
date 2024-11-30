@@ -13,13 +13,16 @@ namespace RestProxy
 
     public class RestProxyManager
     {
+        public double RequestTimeoutMilliseconds { get; set; } = 5000;
+        public bool AllowUntrustedServerCertificate { get; set; } = false;
+
         public event RequestFinishedEventHandler? RequestFinished;
 
-        private readonly RestApiCaller _apiCaller;
+        private readonly string _baseUri;
 
-        public RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000)
+        public RestProxyManager(string baseUri)
         {
-            _apiCaller = new RestApiCaller(baseUri, requestTimeoutMilliseconds);
+            _baseUri = baseUri;
         }
 
         public TController GetProxy<TController>(bool throwOnNonSuccessfulResponse = true)
@@ -35,7 +38,7 @@ namespace RestProxy
                 throw new RestException("Error while creating communication proxy with the api", HttpStatusCode.InternalServerError);
             }
 
-            proxy.ApiCaller = _apiCaller;
+            proxy.ApiCaller = new RestApiCaller(_baseUri, RequestTimeoutMilliseconds, AllowUntrustedServerCertificate);
             proxy.RequestFinished = RequestFinished;
             proxy.ThrowOnNonSuccessfulResponse = throwOnNonSuccessfulResponse;
 

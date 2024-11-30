@@ -12,23 +12,33 @@ namespace RestProxy
     {
         private readonly HttpClient _client;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
         {
-            if(string.IsNullOrEmpty(baseUri))
+            if (string.IsNullOrEmpty(baseUri))
             {
                 throw new ArgumentException("Base uri cannot be empty");
             }
 
-            _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds);
+            _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
         }
 
-        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds)
+        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
         {
-            var client = new HttpClient
+            HttpClient client;
+            if (allowUntrustedServerCertificate)
             {
-                BaseAddress = new Uri(baseUri),
-                Timeout = TimeSpan.FromMilliseconds(requestTimeoutMilliseconds),
-            };
+                client = new HttpClient(new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true,
+                });
+            }
+            else
+            {
+                client = new HttpClient();
+            }
+
+            client.BaseAddress = new Uri(baseUri);
+            client.Timeout = TimeSpan.FromMilliseconds(requestTimeoutMilliseconds);
 
             client.DefaultRequestHeaders.Add("Accept", "application/json");
             return client;
