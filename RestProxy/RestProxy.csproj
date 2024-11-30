@@ -4,8 +4,10 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <Description>Proxy for clients that connect with ASP.NET Core server</Description>
-    <Version>1.1.1</Version>
+    <Version>1.1.2</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>- Timeout is now a property of the RestProxyManager
+- AllowUntrustedServerCertificate property has been added, which is self explanatory</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
