@@ -11,12 +11,12 @@ namespace RestProxy
     internal class RestApiCaller
     {
         private readonly HttpClient _client;
-        private readonly Func<HttpClient, Task>? _authorizeActionAsync;
+        private readonly Func<HttpClient, Task>? _authenticateActionAsync;
         private readonly bool _authorizeBeforeFirstRequest;
         private readonly bool _authorizeOnUnauthorizedResponse;
         private bool _wasFirstRequestMade;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authorizeActionAsync = null, bool? authorizeBeforeFirstRequest = null, bool? authorizeOnUnauthorizedResponse = null)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null, bool? authenticateBeforeFirstRequest = null, bool? authenticateOnUnauthorizedResponse = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -24,9 +24,9 @@ namespace RestProxy
             }
 
             _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
-            _authorizeActionAsync = authorizeActionAsync;
-            _authorizeBeforeFirstRequest = authorizeBeforeFirstRequest ?? false;
-            _authorizeOnUnauthorizedResponse = authorizeOnUnauthorizedResponse ?? false;
+            _authenticateActionAsync = authenticateActionAsync;
+            _authorizeBeforeFirstRequest = authenticateBeforeFirstRequest ?? false;
+            _authorizeOnUnauthorizedResponse = authenticateOnUnauthorizedResponse ?? authenticateActionAsync != null;
             _wasFirstRequestMade = false;
         }
 
@@ -93,7 +93,7 @@ namespace RestProxy
             {
                 if (!_wasFirstRequestMade && _authorizeBeforeFirstRequest)
                 {
-                    if (_authorizeActionAsync != null) await _authorizeActionAsync.Invoke(_client);
+                    if (_authenticateActionAsync != null) await _authenticateActionAsync.Invoke(_client);
                 }
 
                 if (requestWithContent != null)
@@ -133,7 +133,7 @@ namespace RestProxy
             {
                 if (response.StatusCode == HttpStatusCode.Unauthorized && _authorizeOnUnauthorizedResponse && isFirstRequestInSequence)
                 {
-                    if (_authorizeActionAsync != null) await _authorizeActionAsync.Invoke(_client);
+                    if (_authenticateActionAsync != null) await _authenticateActionAsync.Invoke(_client);
                     await CallRest(requestUri, method, body, false);
                 }
 
