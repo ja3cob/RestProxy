@@ -4,9 +4,9 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <Description>Proxy for clients that connect with ASP.NET Core server</Description>
-    <Version>1.1.3</Version>
+    <Version>1.2.0</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>- Timeout and allow untrusted certificate are constructor parameters instead of properties</PackageReleaseNotes>
+    <PackageReleaseNotes>- Added custom header-based authentication</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

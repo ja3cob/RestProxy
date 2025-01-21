@@ -11,8 +11,9 @@ namespace RestProxy
     internal class RestApiCaller
     {
         private readonly HttpClient _client;
+        private readonly Func<HttpClient, Task>? _authenticateActionAsync;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -20,6 +21,7 @@ namespace RestProxy
             }
 
             _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
+            _authenticateActionAsync = authenticateActionAsync;
         }
 
         private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
@@ -45,6 +47,22 @@ namespace RestProxy
         }
 
         public async Task<HttpResponseMessage> CallRest(string requestUri, HttpMethod method, string? body)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                response = await CallRestInternal(requestUri, method, body);
+            }
+            catch (RestException rex) when (rex.Code == HttpStatusCode.Unauthorized && _authenticateActionAsync != null)
+            {
+                await _authenticateActionAsync.Invoke(_client);
+                return await CallRestInternal(requestUri, method, body);
+            }
+
+            return response;
+        }
+
+        private async Task<HttpResponseMessage> CallRestInternal(string requestUri, HttpMethod method, string? body)
         {
             StringContent? content = null;
             if (body != null)
@@ -117,7 +135,10 @@ namespace RestProxy
             if (response.IsSuccessStatusCode == false)
             {
                 string? message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw new RestException(string.IsNullOrWhiteSpace(message.Replace("\"", "")) ? "Error while processing the request" : message, response.StatusCode);
+                throw new RestException(
+                    string.IsNullOrWhiteSpace(message.Replace("\"", ""))
+                        ? "Error while processing the request"
+                        : message, response.StatusCode);
             }
 
             return response;
