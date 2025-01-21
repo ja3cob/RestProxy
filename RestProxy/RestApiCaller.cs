@@ -14,7 +14,8 @@ namespace RestProxy
         private readonly Func<HttpClient, Task>? _authenticateActionAsync;
         private bool _wasFirstRequestMade;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate,
+            Func<HttpClient, Task>? authenticateActionAsync = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -26,7 +27,8 @@ namespace RestProxy
             _wasFirstRequestMade = false;
         }
 
-        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
+        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds,
+            bool allowUntrustedServerCertificate)
         {
             HttpClient client;
             if (allowUntrustedServerCertificate)
@@ -48,7 +50,23 @@ namespace RestProxy
             return client;
         }
 
-        public async Task<HttpResponseMessage> CallRest(string requestUri, HttpMethod method, string? body, bool isFirstRequestInSequence = true)
+        public async Task<HttpResponseMessage> CallRest(string requestUri, HttpMethod method, string? body)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                response = await CallRestInternal(requestUri, method, body);
+            }
+            catch (RestException rex) when (rex.Code == HttpStatusCode.Unauthorized && _authenticateActionAsync != null) // CIUCIAJ
+            {
+                await _authenticateActionAsync.Invoke(_client);
+                return await CallRestInternal(requestUri, method, body);
+            }
+
+            return response;
+        }
+
+        private async Task<HttpResponseMessage> CallRestInternal(string requestUri, HttpMethod method, string? body)
         {
             StringContent? content = null;
             if (body != null)
@@ -127,17 +145,11 @@ namespace RestProxy
 
             if (response.IsSuccessStatusCode == false)
             {
-                if (response.StatusCode == HttpStatusCode.Unauthorized && isFirstRequestInSequence)
-                {
-                    if (_authenticateActionAsync != null)
-                    {
-                        await _authenticateActionAsync.Invoke(_client);
-                    }
-                    return await CallRest(requestUri, method, body, false);
-                }
-
                 string? message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                throw new RestException(string.IsNullOrWhiteSpace(message.Replace("\"", "")) ? "Error while processing the request" : message, response.StatusCode);
+                throw new RestException(
+                    string.IsNullOrWhiteSpace(message.Replace("\"", ""))
+                        ? "Error while processing the request"
+                        : message, response.StatusCode);
             }
 
             return response;
@@ -152,7 +164,8 @@ namespace RestProxy
 
             List<string> setCookies = cookiesEnumerable.ToList();
 
-            KeyValuePair<string, IEnumerable<string>> existingCookies = _client.DefaultRequestHeaders.FirstOrDefault(p => p.Key == "Cookie");
+            KeyValuePair<string, IEnumerable<string>> existingCookies =
+                _client.DefaultRequestHeaders.FirstOrDefault(p => p.Key == "Cookie");
             IEnumerable<string> setCookieNames = setCookies.Select(p => p.Split('=')[0]);
 
             List<string> cookiesToAdd = existingCookies.Key == null

@@ -61,5 +61,3 @@ As it is for now, RestProxyManager has 2 properties:
         var result = proxy.GetResult().Value; //Authentication happens on first 401 Unauthorized response
         ```
         *This construction allows to configure header-based authentication.*
-
-        You can also configure other authentication options via **RestProxyManager** constructor parameters.
