@@ -51,7 +51,7 @@ As it is for now, RestProxyManager has 2 properties:
          var proxy = manager.GetProxy<IAuthenticationController>();
          bool result = (await proxy.Login(new LoginRequest(username, password))).Value;
 
-    *This construction automatically sets coockies when an appropriate header is received in response.*
+    *This construction automatically sets cookies when an appropriate header is received in response.*
 
     1. Optionally you can configure authentication by providing asynchronous authentication method delegate in the constructor.
 

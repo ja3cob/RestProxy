@@ -18,9 +18,9 @@ namespace RestProxy
 
         private readonly RestApiCaller _apiCaller;
 
-        public RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000, bool allowUntrustedServerCertificate = false, Func<HttpClient, Task>? authenticateActionAsync = null, bool? authenticateBeforeFirstRequest = null, bool? authenticateOnUnauthorizedResponse = null)
+        public RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000, bool allowUntrustedServerCertificate = false, Func<HttpClient, Task>? authenticateActionAsync = null)
         {
-            _apiCaller = new RestApiCaller(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate, authenticateActionAsync, authenticateBeforeFirstRequest, authenticateOnUnauthorizedResponse);
+            _apiCaller = new RestApiCaller(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate, authenticateActionAsync);
         }
 
         public TController GetProxy<TController>(bool throwOnNonSuccessfulResponse = true)

@@ -12,11 +12,9 @@ namespace RestProxy
     {
         private readonly HttpClient _client;
         private readonly Func<HttpClient, Task>? _authenticateActionAsync;
-        private readonly bool _authorizeBeforeFirstRequest;
-        private readonly bool _authorizeOnUnauthorizedResponse;
         private bool _wasFirstRequestMade;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null, bool? authenticateBeforeFirstRequest = null, bool? authenticateOnUnauthorizedResponse = null)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -25,8 +23,6 @@ namespace RestProxy
 
             _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
             _authenticateActionAsync = authenticateActionAsync;
-            _authorizeBeforeFirstRequest = authenticateBeforeFirstRequest ?? false;
-            _authorizeOnUnauthorizedResponse = authenticateOnUnauthorizedResponse ?? authenticateActionAsync != null;
             _wasFirstRequestMade = false;
         }
 
@@ -91,9 +87,9 @@ namespace RestProxy
             HttpResponseMessage? response = null;
             try
             {
-                if (!_wasFirstRequestMade && _authorizeBeforeFirstRequest)
+                if (!_wasFirstRequestMade && _authenticateActionAsync != null)
                 {
-                    if (_authenticateActionAsync != null) await _authenticateActionAsync.Invoke(_client);
+                    await _authenticateActionAsync.Invoke(_client);
                 }
 
                 if (requestWithContent != null)
@@ -131,10 +127,13 @@ namespace RestProxy
 
             if (response.IsSuccessStatusCode == false)
             {
-                if (response.StatusCode == HttpStatusCode.Unauthorized && _authorizeOnUnauthorizedResponse && isFirstRequestInSequence)
+                if (response.StatusCode == HttpStatusCode.Unauthorized && isFirstRequestInSequence)
                 {
-                    if (_authenticateActionAsync != null) await _authenticateActionAsync.Invoke(_client);
-                    await CallRest(requestUri, method, body, false);
+                    if (_authenticateActionAsync != null)
+                    {
+                        await _authenticateActionAsync.Invoke(_client);
+                    }
+                    return await CallRest(requestUri, method, body, false);
                 }
 
                 string? message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
