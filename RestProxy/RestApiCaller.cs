@@ -11,8 +11,12 @@ namespace RestProxy
     internal class RestApiCaller
     {
         private readonly HttpClient _client;
+        private readonly Func<HttpClient, Task>? _authorizeActionAsync;
+        private readonly bool _authorizeBeforeFirstRequest;
+        private readonly bool _authorizeOnUnauthorizedResponse;
+        private bool _wasFirstRequestMade;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authorizeActionAsync = null, bool? authorizeBeforeFirstRequest = null, bool? authorizeOnUnauthorizedResponse = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -20,6 +24,10 @@ namespace RestProxy
             }
 
             _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
+            _authorizeActionAsync = authorizeActionAsync;
+            _authorizeBeforeFirstRequest = authorizeBeforeFirstRequest ?? false;
+            _authorizeOnUnauthorizedResponse = authorizeOnUnauthorizedResponse ?? false;
+            _wasFirstRequestMade = false;
         }
 
         private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
@@ -44,7 +52,7 @@ namespace RestProxy
             return client;
         }
 
-        public async Task<HttpResponseMessage> CallRest(string requestUri, HttpMethod method, string? body)
+        public async Task<HttpResponseMessage> CallRest(string requestUri, HttpMethod method, string? body, bool isFirstRequestInSequence = true)
         {
             StringContent? content = null;
             if (body != null)
@@ -83,6 +91,11 @@ namespace RestProxy
             HttpResponseMessage? response = null;
             try
             {
+                if (!_wasFirstRequestMade && _authorizeBeforeFirstRequest)
+                {
+                    if (_authorizeActionAsync != null) await _authorizeActionAsync.Invoke(_client);
+                }
+
                 if (requestWithContent != null)
                 {
                     response = await requestWithContent(requestUri, content).ConfigureAwait(false);
@@ -107,6 +120,8 @@ namespace RestProxy
                 throw new RestException("Error while processing the request", HttpStatusCode.InternalServerError, ex);
             }
 
+            _wasFirstRequestMade = true;
+
             SetCookies(response);
 
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -116,6 +131,12 @@ namespace RestProxy
 
             if (response.IsSuccessStatusCode == false)
             {
+                if (response.StatusCode == HttpStatusCode.Unauthorized && _authorizeOnUnauthorizedResponse && isFirstRequestInSequence)
+                {
+                    if (_authorizeActionAsync != null) await _authorizeActionAsync.Invoke(_client);
+                    await CallRest(requestUri, method, body, false);
+                }
+
                 string? message = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 throw new RestException(string.IsNullOrWhiteSpace(message.Replace("\"", "")) ? "Error while processing the request" : message, response.StatusCode);
             }

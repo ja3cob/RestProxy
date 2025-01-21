@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using ASPClientLib.Attributes;
@@ -17,9 +18,9 @@ namespace RestProxy
 
         private readonly RestApiCaller _apiCaller;
 
-        public RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000, bool allowUntrustedServerCertificate = false)
+        public RestProxyManager(string baseUri, double requestTimeoutMilliseconds = 5000, bool allowUntrustedServerCertificate = false, Func<HttpClient, Task>? authorizeActionAsync = null, bool? authorizeBeforeFirstRequest = null, bool? authorizeOnUnauthorizedResponse = null)
         {
-            _apiCaller = new RestApiCaller(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
+            _apiCaller = new RestApiCaller(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate, authorizeActionAsync, authorizeBeforeFirstRequest, authorizeOnUnauthorizedResponse);
         }
 
         public TController GetProxy<TController>(bool throwOnNonSuccessfulResponse = true)
