@@ -13,8 +13,7 @@ namespace RestProxy
         private readonly HttpClient _client;
         private readonly Func<HttpClient, Task>? _authenticateActionAsync;
 
-        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate,
-            Func<HttpClient, Task>? authenticateActionAsync = null)
+        public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate, Func<HttpClient, Task>? authenticateActionAsync = null)
         {
             if (string.IsNullOrEmpty(baseUri))
             {
@@ -25,8 +24,7 @@ namespace RestProxy
             _authenticateActionAsync = authenticateActionAsync;
         }
 
-        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds,
-            bool allowUntrustedServerCertificate)
+        private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate)
         {
             HttpClient client;
             if (allowUntrustedServerCertificate)
@@ -155,8 +153,7 @@ namespace RestProxy
 
             List<string> setCookies = cookiesEnumerable.ToList();
 
-            KeyValuePair<string, IEnumerable<string>> existingCookies =
-                _client.DefaultRequestHeaders.FirstOrDefault(p => p.Key == "Cookie");
+            KeyValuePair<string, IEnumerable<string>> existingCookies = _client.DefaultRequestHeaders.FirstOrDefault(p => p.Key == "Cookie");
             IEnumerable<string> setCookieNames = setCookies.Select(p => p.Split('=')[0]);
 
             List<string> cookiesToAdd = existingCookies.Key == null
