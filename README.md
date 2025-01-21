@@ -45,8 +45,21 @@ As it is for now, RestProxyManager has 2 properties:
     > Note that the interface uses types from the **[ASPClientLib](https://github.com/ja3cob/ASPClientLib)** package to mantain support on all client platforms
     
 2. Reference **RestProxy** and your controller interface (here **IAutenticationController**) in your client project.
-3. Create a new instance of the **RestProxyManager** class, providing base url of the server as the constructor parameter. Use the manager to get proxy and send request to the server
+3. Create a new instance of the **RestProxyManager** class, providing base url of the server as the constructor parameter. Use the manager to get proxy and send request to the server.
 
          var manager = new RestProxyManager("https://localhost:5000/");
          var proxy = manager.GetProxy<IAuthenticationController>();
          bool result = (await proxy.Login(new LoginRequest(username, password))).Value;
+
+    *This construction automatically sets coockies when an appropriate header is received in response.*
+
+    1. Optionally you can configure authentication by providing asynchronous authentication method delegate in the constructor.
+
+        ```
+        var manager = new RestProxyManager("https://localhost:5000", authenticateActionAsync: AuthenticateAsync);
+        var proxy = manager.GetProxy<ISimpleController>();
+        var result = proxy.GetResult().Value; //Authentication happens on first 401 Unauthorized response
+        ```
+        *This construction allows to configure header-based authentication.*
+
+        You can also configure other authentication options via **RestProxyManager** constructor parameters.
