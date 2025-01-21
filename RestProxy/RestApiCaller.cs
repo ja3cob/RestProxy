@@ -12,7 +12,6 @@ namespace RestProxy
     {
         private readonly HttpClient _client;
         private readonly Func<HttpClient, Task>? _authenticateActionAsync;
-        private bool _wasFirstRequestMade;
 
         public RestApiCaller(string baseUri, double requestTimeoutMilliseconds, bool allowUntrustedServerCertificate,
             Func<HttpClient, Task>? authenticateActionAsync = null)
@@ -24,7 +23,6 @@ namespace RestProxy
 
             _client = CreateHttpClient(baseUri, requestTimeoutMilliseconds, allowUntrustedServerCertificate);
             _authenticateActionAsync = authenticateActionAsync;
-            _wasFirstRequestMade = false;
         }
 
         private static HttpClient CreateHttpClient(string baseUri, double requestTimeoutMilliseconds,
@@ -57,7 +55,7 @@ namespace RestProxy
             {
                 response = await CallRestInternal(requestUri, method, body);
             }
-            catch (RestException rex) when (rex.Code == HttpStatusCode.Unauthorized && _authenticateActionAsync != null) // CIUCIAJ
+            catch (RestException rex) when (rex.Code == HttpStatusCode.Unauthorized && _authenticateActionAsync != null)
             {
                 await _authenticateActionAsync.Invoke(_client);
                 return await CallRestInternal(requestUri, method, body);
@@ -105,11 +103,6 @@ namespace RestProxy
             HttpResponseMessage? response = null;
             try
             {
-                if (!_wasFirstRequestMade && _authenticateActionAsync != null)
-                {
-                    await _authenticateActionAsync.Invoke(_client);
-                }
-
                 if (requestWithContent != null)
                 {
                     response = await requestWithContent(requestUri, content).ConfigureAwait(false);
@@ -133,8 +126,6 @@ namespace RestProxy
             {
                 throw new RestException("Error while processing the request", HttpStatusCode.InternalServerError, ex);
             }
-
-            _wasFirstRequestMade = true;
 
             SetCookies(response);
 
