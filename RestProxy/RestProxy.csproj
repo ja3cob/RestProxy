@@ -4,9 +4,12 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
     <Description>Proxy for clients that connect with ASP.NET Core server</Description>
-    <Version>1.2.1</Version>
+    <VersionPrefix>1.2.2</VersionPrefix>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>- Added custom header-based authentication</PackageReleaseNotes>
+    <PackageReleaseNotes>- Cleaned up package metadata</PackageReleaseNotes>
+    <Title>RestProxy</Title>
+    <Authors>Jakub Becker</Authors>
+    <RepositoryUrl>https://github.com/ja3cob/RestProxy</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
